@@ -1,0 +1,2 @@
+class RotationData:
+    pass
