@@ -72,7 +72,7 @@ def load_movement(path, learning=False):
                 skip_header_line = True
             else:
                 movement_trials[last_trial_number].append(MovementData.from_str(line))
-    if learning and 99 in movement_trials:
+    if not learning and 99 in movement_trials:
         movement_trials.pop(99)
     return movement_trials
 
