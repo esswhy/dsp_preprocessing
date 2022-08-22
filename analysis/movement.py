@@ -12,6 +12,30 @@ import matplotlib.patches as patches
 # BottomRight 227 -1
 # for key, value in subjects.movement_sequence.items():
 
+class Shortcuts:
+    def __init__(self, dict_generator):
+        self.shortcuts = {}
+        for row in dict_generator:
+            source = row["Source"]
+            destination = row["Destination"]
+            distance = float(row["Distance"])
+            inner_dict = {destination: distance}
+            if source in self.shortcuts.keys():
+                self.shortcuts[source].update(inner_dict)
+            else:
+                self.shortcuts[source] = inner_dict
+
+    def get_shortcut(self, a, b):
+        try:
+            return self.shortcuts[a][b]
+        except KeyError:
+            pass
+        try:
+            return self.shortcuts[b][a]
+        except KeyError:
+            return None
+
+
 class MovementData:
     def __init__(self, trial_name, trial_number, trial_time, x, y, rotation):
         self.y = y
@@ -22,10 +46,12 @@ class MovementData:
         self.rotation = rotation
 
     def get_vector(self):
+        """:return np.ndarray"""
         return np.array([float(self.x), float(self.y)])
 
     @staticmethod
     def from_str(s=""):
+        """:return MovementData"""
         elements = [element.strip() for element in s.split(",")]
         if len(elements) < 6:
             return None
@@ -33,11 +59,18 @@ class MovementData:
 
 
 class MovementAnalyzer:
-    def __init__(self, origin=np.array([0.6, -1.1]), map_actual_size=np.array([226, 226]), grid_size=np.array([11, 11])):
+    def __init__(self, loader, origin=np.array([0.6, -1.1]), map_actual_size=np.array([226, 226]),
+                 grid_size=np.array([11, 11])):
         self.grid = Grid(origin=origin, map_actual_size=map_actual_size, grid_size=grid_size)
+        self.walls = loader.walls
+        self.shortcut = loader.shortcuts
+        self.trial_configuration = loader.trial_configuration
+        self.current_subject = None
         pass
 
     def load_xy(self, subject, trial_number):
+        """:return np.ndarray,np.ndarray"""
+        self.current_subject = subject
         path = []
         last_moved_block = np.zeros(2)
         for move in subject.movement_sequence[trial_number]:
@@ -46,21 +79,35 @@ class MovementAnalyzer:
                 continue
             # Check offset
             offset = current_pos - last_moved_block
-            if offset.dot(offset) != 1:
-                path.append(current_pos)
+            if not np.array_equal(offset, current_pos) and offset.dot(offset) != 1:
+                correction_offset_1 = offset.copy()
+                correction_offset_2 = offset.copy()
+                correction_offset_1[0] = 0
+                correction_offset_2[1] = 0
+                # print(offset)
+                # print(correction_offset_1)
+                # print(correction_offset_2)
+                correction_point_1 = correction_offset_1 + last_moved_block
+                correction_point_2 = correction_offset_2 + last_moved_block
+                # print(correction_point_1.tolist())
+                # print(correction_point_2.tolist())
+                # print()
+                if tuple(map(int, correction_point_1.tolist())) not in self.walls:
+                    path.append(correction_point_1)
+                elif tuple(map(int, correction_point_2.tolist())) not in self.walls:
+                    path.append(correction_point_2)
+                else:
+                    pass
 
             path.append(current_pos)
             last_moved_block = current_pos
-            if np.array_equal(current_pos, np.array([7,1])):
-                print("Corner case")
-            print(current_pos)
 
         arr = np.array(path)
         x = (arr[:, 0]) - 0.5
         y = (arr[:, 1]) - 0.5
         return x, y
 
-    def draw(self, n, x, y, bg_file="images/maze1.png", ):
+    def draw(self, n, x, y, bg_file="images/maze1.png"):
 
         fig, ax = plt.subplots()
         ax.step(x, y)
@@ -69,8 +116,23 @@ class MovementAnalyzer:
         bg = mpimg.imread(bg_file)
         plt.imshow(bg, extent=[0, self.grid.grid_size[0], 0, self.grid.grid_size[1]])
 
-        plt.title("Trial %d Distance: %d" % (n, len(x)))
-        plt.xticks(np.arange(0, self.grid.grid_size[0]+1, step=1))
-        plt.yticks(np.arange(0, self.grid.grid_size[1]+1, step=1))
+        if self.shortcut:
+            pass
+
+        trial_name = self.current_subject.movement_sequence[n][0].trial_name
+        source, destination = self.trial_configuration.get_source_destination_pair_by_name(trial_name)
+        shortest = self.shortcut.get_shortcut(source, destination)
+        estimated_distance = len(x)
+        efficiency = shortest / estimated_distance
+        if efficiency > 1:
+            efficiency = 1
+        plt.title(
+            f"Trial {n}@{trial_name}\n "
+            f"From {source} to {destination}\n "
+            f"Distance: {estimated_distance} "
+            f"Shortest: {shortest} "
+            f"Efficiency: {efficiency:.2f}")
+        plt.xticks(np.arange(0, self.grid.grid_size[0] + 1, step=1))
+        plt.yticks(np.arange(0, self.grid.grid_size[1] + 1, step=1))
         plt.grid()
         plt.show()

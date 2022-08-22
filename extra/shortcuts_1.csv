@@ -1,0 +1,67 @@
+Source, Destination, Distance
+Picnic Table,Piano,8
+Picnic Table,Bookshelf,5
+Picnic Table,Harp,6
+Picnic Table,Well,9
+Picnic Table,Chair,11
+Picnic Table,Stove,5
+Picnic Table,Plant,4
+Picnic Table,Trash Can,8
+Picnic Table,Wheelbarrow,1
+Picnic Table,Telescope,9
+Picnic Table,Mailbox,10
+Piano,Bookshelf,8
+Piano,Harp,11
+Piano,Well,12
+Piano,Chair,16
+Piano,Stove,8
+Piano,Plant,11
+Piano,Trash Can,5
+Piano,Wheelbarrow,8
+Piano,Telescope,14
+Piano,Mailbox,17
+Bookshelf,Harp,8
+Bookshelf,Well,9
+Bookshelf,Chair,13
+Bookshelf,Stove,11
+Bookshelf,Plant,8
+Bookshelf,Trash Can,4
+Bookshelf,Wheelbarrow,5
+Bookshelf,Telescope,11
+Bookshelf,Mailbox,14
+Harp,Well,4
+Harp,Chair,8
+Harp,Stove,12
+Harp,Plant,9
+Harp,Trash Can,7
+Harp,Wheelbarrow,4
+Harp,Telescope,8
+Harp,Mailbox,11
+Well,Chair,5
+Well,Stove,15
+Well,Plant,12
+Well,Trash Can,8
+Well,Wheelbarrow,7
+Well,Telescope,11
+Well,Mailbox,10
+Chair,Stove,17
+Chair,Plant,14
+Chair,Trash Can,12
+Chair,Wheelbarrow,9
+Chair,Telescope,9
+Chair,Mailbox,6
+Stove,Plant,8
+Stove,Trash Can,12
+Stove,Wheelbarrow,7
+Stove,Telescope,13
+Stove,Mailbox,14
+Plant,Trash Can,11
+Plant,Wheelbarrow,4
+Plant,Telescope,6
+Plant,Mailbox,7
+Trash Can,Wheelbarrow,8
+Trash Can,Telescope,14
+Trash Can,Mailbox,17
+Wheelbarrow,Telescope,7
+Wheelbarrow,Mailbox,10
+Telescope,Mailbox,4
