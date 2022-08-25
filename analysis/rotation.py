@@ -1,5 +1,7 @@
 import numpy as np
 from math import cos, sin
+
+
 class RotationData:
     def __init__(self, trial_name, trial_number, trial_time, rotation):
         self.trial_time = trial_time
@@ -24,15 +26,22 @@ class RotationAnalyzer:
         true_angle = self.loader.trial_configuration.get_true_angle(trial_name)
         estimation_angle = rotation_sequence[trial_number].rotation
 
-        rad_true_angle = np.rad2deg(true_angle)
-        rad_estimation_angle = np.rad2deg(estimation_angle)
+        print(f"Est: {estimation_angle}, True:{true_angle} ")
 
-        v1 = np.array([cos(rad_true_angle), sin(rad_estimation_angle)])
-        v2 = np.array([cos(estimation_angle), sin(estimation_angle)])
+        rad_true_angle = np.deg2rad(true_angle)
+        rad_estimation_angle = np.deg2rad(estimation_angle)
+        # print(rad_true_angle)
+        # print(rad_estimation_angle)
+
+        v1 = np.array([cos(rad_true_angle), sin(rad_true_angle)])
+        v2 = np.array([cos(rad_estimation_angle), sin(rad_estimation_angle)])
+        # print(v1)
+        # print(v2)
         v1_u = v1 / np.linalg.norm(v1)
         v2_u = v2 / np.linalg.norm(v2)
 
         rad_diff = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
         diff = np.rad2deg(rad_diff)
         return diff
+
     pass
