@@ -20,13 +20,15 @@ class InsufficientDataError(Exception):
 
 
 class Loader:
-    def __init__(self, data_dir='data', extra_dir="extra"):
+    def __init__(self, data_dir='data', extra_dir="extra", image_dir="images"):
         self.root_dir = Path(data_dir)
         self.extra_dir = Path(extra_dir)
+        self.image_dir = Path(image_dir)
         self.subjects = {}
         self.walls = []
         self.shortcuts = None
         self.trial_configuration = None
+        self.image_maze1 = None
 
     def load(self, force=False, learning=False):
         if not self.root_dir:
@@ -43,6 +45,8 @@ class Loader:
 
         # Load Trial Configuration
         self.trial_configuration = TrialConfiguration(yield_csv_todict(self.extra_dir.joinpath("trial_1.csv")))
+
+        self.image_maze1 = self.image_dir.joinpath("maze1.png")
 
         # Get participants dirs
         for participant_dir in self.root_dir.iterdir():

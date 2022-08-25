@@ -66,6 +66,7 @@ class MovementAnalyzer:
         self.shortcut = loader.shortcuts
         self.trial_configuration = loader.trial_configuration
         self.current_subject = None
+        self.bg_1 = loader.image_maze1
         pass
 
     def load_xy(self, subject, trial_number):
@@ -84,14 +85,8 @@ class MovementAnalyzer:
                 correction_offset_2 = offset.copy()
                 correction_offset_1[0] = 0
                 correction_offset_2[1] = 0
-                # print(offset)
-                # print(correction_offset_1)
-                # print(correction_offset_2)
                 correction_point_1 = correction_offset_1 + last_moved_block
                 correction_point_2 = correction_offset_2 + last_moved_block
-                # print(correction_point_1.tolist())
-                # print(correction_point_2.tolist())
-                # print()
                 if tuple(map(int, correction_point_1.tolist())) not in self.walls:
                     path.append(correction_point_1)
                 elif tuple(map(int, correction_point_2.tolist())) not in self.walls:
@@ -107,7 +102,10 @@ class MovementAnalyzer:
         y = (arr[:, 1]) - 0.5
         return x, y
 
-    def draw(self, n, x, y, bg_file="images/maze1.png"):
+    def draw(self, n, x, y, bg_file=""):
+
+        if bg_file == "":
+            bg_file = self.bg_1
 
         fig, ax = plt.subplots()
         ax.step(x, y)

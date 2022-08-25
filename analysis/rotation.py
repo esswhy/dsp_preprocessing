@@ -26,7 +26,7 @@ class RotationAnalyzer:
         true_angle = self.loader.trial_configuration.get_true_angle(trial_name)
         estimation_angle = rotation_sequence[trial_number].rotation
 
-        print(f"Est: {estimation_angle}, True:{true_angle} ")
+        # print(f"Est: {estimation_angle}, True:{true_angle} ")
 
         rad_true_angle = np.deg2rad(true_angle)
         rad_estimation_angle = np.deg2rad(estimation_angle)
