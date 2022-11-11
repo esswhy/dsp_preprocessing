@@ -6,7 +6,8 @@
 
 
 class Subject:
-    def __init__(self, meta=None, movement_sequence=None, rotation_sequence=None):
+    def __init__(self, meta=None, movement_sequence=None, rotation_sequence=None, name=None):
+        self.name = name
         self.meta = meta
         self.movement_sequence = movement_sequence
         self.rotation_sequence = rotation_sequence

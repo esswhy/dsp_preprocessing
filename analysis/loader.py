@@ -30,6 +30,9 @@ class Loader:
         self.trial_configuration = None
         self.image_maze1 = None
 
+    def get_subjects(self, subjects):
+        return [self.subjects[subject] for subject in subjects]
+
     def load(self, force=False, learning=False):
         if not self.root_dir:
             return
@@ -64,16 +67,16 @@ class Loader:
             if len(file_paths.items()) != 4 and force:
                 raise InsufficientDataError("Corrupted file")
 
-            subject = Subject()
+            subject = Subject(name=participant_dir.name)
             try:
                 subject.meta = load_meta(file_paths[META_FILE])
                 subject.rotation_sequence = load_rotation(file_paths[ROTATION_FILE])
                 subject.movement_sequence = load_movement(file_paths[MOVEMENT_FILE], learning=learning)
                 # TODO: add timeout here
             except KeyError as e:
-                print(e)
+                # print(e)
                 if not force:
-                    raise CorruptedDataError("Makesure you have all the filenames correct")
+                    raise CorruptedDataError("Makesure you have all the filenames correct, otherwise exclude the folder"+ str(participant_dir))
 
             self.subjects[participant_dir.name] = subject
 

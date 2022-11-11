@@ -67,40 +67,44 @@ class MovementAnalyzer:
         self.trial_configuration = loader.trial_configuration
         self.current_subject = None
         self.bg_1 = loader.image_maze1
+        self.subjects = loader.subjects
         pass
 
     def load_xy(self, subject, trial_number):
         """:return np.ndarray,np.ndarray"""
-        self.current_subject = subject
-        path = []
-        last_moved_block = np.zeros(2)
-        for move in subject.movement_sequence[trial_number]:
-            current_pos = self.grid.get_block_pos(move.get_vector())
-            if np.array_equal(last_moved_block, current_pos):
-                continue
-            # Check offset
-            offset = current_pos - last_moved_block
-            if not np.array_equal(offset, current_pos) and offset.dot(offset) != 1:
-                correction_offset_1 = offset.copy()
-                correction_offset_2 = offset.copy()
-                correction_offset_1[0] = 0
-                correction_offset_2[1] = 0
-                correction_point_1 = correction_offset_1 + last_moved_block
-                correction_point_2 = correction_offset_2 + last_moved_block
-                if tuple(map(int, correction_point_1.tolist())) not in self.walls:
-                    path.append(correction_point_1)
-                elif tuple(map(int, correction_point_2.tolist())) not in self.walls:
-                    path.append(correction_point_2)
-                else:
-                    pass
+        try:
+            self.current_subject = subject
+            path = []
+            last_moved_block = np.zeros(2)
+            for move in subject.movement_sequence[trial_number]:
+                current_pos = self.grid.get_block_pos(move.get_vector())
+                if np.array_equal(last_moved_block, current_pos):
+                    continue
+                # Check offset
+                offset = current_pos - last_moved_block
+                if not np.array_equal(offset, current_pos) and offset.dot(offset) != 1:
+                    correction_offset_1 = offset.copy()
+                    correction_offset_2 = offset.copy()
+                    correction_offset_1[0] = 0
+                    correction_offset_2[1] = 0
+                    correction_point_1 = correction_offset_1 + last_moved_block
+                    correction_point_2 = correction_offset_2 + last_moved_block
+                    if tuple(map(int, correction_point_1.tolist())) not in self.walls:
+                        path.append(correction_point_1)
+                    elif tuple(map(int, correction_point_2.tolist())) not in self.walls:
+                        path.append(correction_point_2)
+                    else:
+                        pass
 
-            path.append(current_pos)
-            last_moved_block = current_pos
+                path.append(current_pos)
+                last_moved_block = current_pos
 
-        arr = np.array(path)
-        x = (arr[:, 0]) - 0.5
-        y = (arr[:, 1]) - 0.5
-        return x, y
+            arr = np.array(path)
+            x = (arr[:, 0]) - 0.5
+            y = (arr[:, 1]) - 0.5
+            return x, y
+        except:
+           raise KeyError("Makesure you have the uncorrupted file, otherwise exclude the folder "+ str(subject.name))
 
     def draw(self, n, x, y, bg_file=""):
 
@@ -134,3 +138,31 @@ class MovementAnalyzer:
         plt.yticks(np.arange(0, self.grid.grid_size[1] + 1, step=1))
         plt.grid()
         plt.show()
+
+    def calculate_efficiency(self, n, x, y):
+        trial_name = self.current_subject.movement_sequence[n][0].trial_name
+        source, destination = self.trial_configuration.get_source_destination_pair_by_name(trial_name)
+        shortest = self.shortcut.get_shortcut(source, destination)
+        estimated_distance = len(x)
+        efficiency = shortest / estimated_distance
+        if efficiency > 1:
+            efficiency = 1
+        return efficiency
+
+    def calculate_efficiency_for_one(self, subject, start, end):
+        efficiency_dict = {}
+        for n in range(start, end):
+            x, y = self.load_xy(self.subjects[subject], n)
+            efficiency_dict[n] = self.calculate_efficiency(n, x, y)
+        return efficiency_dict
+
+    def calculate_efficiency_for_all(self, start=3, end=23, excluding=None):
+        if excluding is None:
+            excluding = []
+
+        efficiency_dict = {}
+        for subject in self.subjects:
+            if subject in excluding:
+                continue
+            efficiency_dict[subject] = self.calculate_efficiency_for_one(subject, start, end)
+        return efficiency_dict
