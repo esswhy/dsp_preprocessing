@@ -104,7 +104,7 @@ class MovementAnalyzer:
             y = (arr[:, 1]) - 0.5
             return x, y
         except:
-           raise KeyError("Makesure you have the uncorrupted file, otherwise exclude the folder "+ str(subject.name))
+            raise KeyError("Makesure you have the uncorrupted file, otherwise exclude the folder " + str(subject.name))
 
     def draw(self, n, x, y, bg_file=""):
 
@@ -139,24 +139,29 @@ class MovementAnalyzer:
         plt.grid()
         plt.show()
 
-    def calculate_efficiency(self, n, x, y):
+    def calculate_efficiency(self, n, x, y, reverse_divide=False, capped=True):
         trial_name = self.current_subject.movement_sequence[n][0].trial_name
         source, destination = self.trial_configuration.get_source_destination_pair_by_name(trial_name)
         shortest = self.shortcut.get_shortcut(source, destination)
         estimated_distance = len(x)
-        efficiency = shortest / estimated_distance
-        if efficiency > 1:
-            efficiency = 1
+        if reverse_divide:
+            efficiency = shortest / estimated_distance
+            if efficiency > 1 and capped:
+                efficiency = 1
+        else:
+            efficiency = estimated_distance / shortest
+            if efficiency < 1 and capped:
+                efficiency = 1
         return efficiency
 
-    def calculate_efficiency_for_one(self, subject, start, end):
+    def calculate_efficiency_for_one(self, subject, start, end, reverse_divide=False, capped=True):
         efficiency_dict = {}
         for n in range(start, end):
             x, y = self.load_xy(self.subjects[subject], n)
-            efficiency_dict[n] = self.calculate_efficiency(n, x, y)
+            efficiency_dict[n] = self.calculate_efficiency(n, x, y, reverse_divide, capped)
         return efficiency_dict
 
-    def calculate_efficiency_for_all(self, start=3, end=23, excluding=None):
+    def calculate_efficiency_for_all(self, start=3, end=23, excluding=None, reverse_divide=False, capped=True):
         if excluding is None:
             excluding = []
 
@@ -164,5 +169,5 @@ class MovementAnalyzer:
         for subject in self.subjects:
             if subject in excluding:
                 continue
-            efficiency_dict[subject] = self.calculate_efficiency_for_one(subject, start, end)
+            efficiency_dict[subject] = self.calculate_efficiency_for_one(subject, start, end, reverse_divide, capped)
         return efficiency_dict
