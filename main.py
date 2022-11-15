@@ -19,7 +19,7 @@ movement_analyzer = MovementAnalyzer(loader)
 # rotation analyzer gives the absolute angular error for each trial (both normal and alternative)
 rotation_analyzer = RotationAnalyzer(loader)
 
-excluding = ["CY4GO", "PE12LE", "MA14BL_learn_point", "JU11SI", "sa13pe"]
+excluding = [ "PE12LE", "MA14BL_learn_point", "JU11SI", "sa13pe", "CY4GO"]
 # excluding=[]
 
 # for n in range(3, 23):
@@ -43,6 +43,10 @@ efficiencies = movement_analyzer.calculate_efficiency_for_all(excluding=excludin
 
 print(efficiencies["lexietest"][3]) # Print just one subject's error on trial 3
 print(efficiencies["lexietest"]) # Print just one subject's error on all trials
+
+from analysis import Exporter
+Exporter.export_to_csv(errors, efficiencies, "mean.csv", operation="mean")
+Exporter.export_to_csv(errors, efficiencies, "all.csv", operation="all")
 
 
 
