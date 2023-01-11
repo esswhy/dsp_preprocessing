@@ -68,15 +68,34 @@ class Loader:
                 raise InsufficientDataError("Corrupted file")
 
             subject = Subject(name=participant_dir.name)
-            try:
-                subject.meta = load_meta(file_paths[META_FILE])
-                subject.rotation_sequence = load_rotation(file_paths[ROTATION_FILE])
-                subject.movement_sequence = load_movement(file_paths[MOVEMENT_FILE], learning=learning)
-                # TODO: add timeout here
-            except KeyError as e:
-                # print(e)
+
+            # Check if all files are present
+            # if not force, throw error
+            # otherwise just print which file is missing
+
+            if META_FILE not in file_paths:
                 if not force:
-                    raise CorruptedDataError("Makesure you have all the filenames correct, otherwise exclude the folder"+ str(participant_dir))
+                    print("Missing meta file for subject {}".format(participant_dir.name))
+                else:
+                    raise InsufficientDataError("Missing meta file for subject {}".format(participant_dir.name))
+
+            if MOVEMENT_FILE not in file_paths:
+                if not force:
+                    print("Movement file", MOVEMENT_FILE, "missing for", participant_dir.name)
+                    print("Ignore if you don't need to process movement data")
+                else:
+                    raise InsufficientDataError("Movement file missing")
+            else:
+                subject.movement_sequence = load_movement(file_paths[MOVEMENT_FILE], learning=learning)
+
+            if ROTATION_FILE not in file_paths:
+                if not force:
+                    print("Rotation file", ROTATION_FILE, "missing for", participant_dir.name)
+                    print("Ignore if you don't need to process rotation data")
+                else:
+                    raise InsufficientDataError("Rotation file missing")
+            else:
+                subject.rotation_sequence = load_rotation(file_paths[ROTATION_FILE])
 
             self.subjects[participant_dir.name] = subject
 

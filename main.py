@@ -17,7 +17,7 @@ lexie_test = loader.subjects["lexietest"]
 movement_analyzer = MovementAnalyzer(loader)
 
 # rotation analyzer gives the absolute angular error for each trial (both normal and alternative)
-rotation_analyzer = RotationAnalyzer(loader)
+#rotation_analyzer = RotationAnalyzer(loader)
 
 excluding = ["PE12LE", "MA14BL_learn_point", "JU11SI", "sa13pe", "CY4GO"]
 # excluding=[]
@@ -26,10 +26,10 @@ excluding = ["PE12LE", "MA14BL_learn_point", "JU11SI", "sa13pe", "CY4GO"]
 #     err = rotation_analyzer.calculate_estimation_error("lexietest", n)
 #     print(f"TrialNumber {n}, estimation error {err}")
 
-errors = rotation_analyzer.calculate_all_estimation_error_for_all(3, 23, excluding=excluding)
+#errors = rotation_analyzer.calculate_all_estimation_error_for_all(3, 23, excluding=excluding)
 
-print(errors["lexietest"][3])  # Print just one subject's error on trial 3
-print(errors["lexietest"])  # Print just one subject's error on all trials
+#print(errors["lexietest"][3])  # Print just one subject's error on trial 3
+#print(errors["lexietest"])  # Print just one subject's error on all trials
 
 # Noted that though the trial number is always from 3-23, the starting location and target is different between pointing and wayfinding
 # for n in range(3, 23):
@@ -42,7 +42,7 @@ efficiencies = movement_analyzer.calculate_efficiency_for_all(excluding=excludin
 print(efficiencies["lexietest"][3])  # Print just one subject's error on trial 3
 print(efficiencies["lexietest"])  # Print just one subject's error on all trials
 
-from analysis import Exporter
+#from analysis import Exporter
 
-Exporter.export_to_csv(errors, efficiencies, "mean.csv", operation="mean")
-Exporter.export_to_csv(errors, efficiencies, "all.csv", operation="all")
+#Exporter.export_to_csv(errors, efficiencies, "mean.csv", operation="mean")
+#Exporter.export_to_csv(errors, efficiencies, "all.csv", operation="all")

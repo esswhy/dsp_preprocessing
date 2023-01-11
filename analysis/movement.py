@@ -103,8 +103,8 @@ class MovementAnalyzer:
             x = (arr[:, 0]) - 0.5
             y = (arr[:, 1]) - 0.5
             return x, y
-        except:
-            raise KeyError("Makesure you have the uncorrupted file, otherwise exclude the folder " + str(subject.name))
+        except TypeError:
+            raise KeyError("Make sure all the files are in the correct format, otherwise exclude the folder " + str(subject.name))
 
     def draw(self, n, x, y, bg_file=""):
 
