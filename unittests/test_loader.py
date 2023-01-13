@@ -9,7 +9,7 @@ class MyTestCase(unittest.TestCase):
     #     self.assertEqual(True, False)  # add assertion here
 
     def test_csv_read(self):
-        string_wall_info = load_csv_tolist("../extra/walls.csv")
+        string_wall_info = load_csv_tolist("../extra/walls_1.csv")
         walls = []
         for pair in string_wall_info:
             if len(pair) < 2:

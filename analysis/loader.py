@@ -33,23 +33,27 @@ class Loader:
     def get_subjects(self, subjects):
         return [self.subjects[subject] for subject in subjects]
 
-    def load(self, force=False, learning=False):
+    def load(self, force=False, learning=False, alternative=False):
         if not self.root_dir:
             return
 
+        number_of_maze = 1
+        if alternative:
+            number_of_maze = 2
+
         # Load Walls
-        for pair in load_csv_tolist(self.extra_dir.joinpath("walls.csv")):
+        for pair in load_csv_tolist(self.extra_dir.joinpath(f"walls_{number_of_maze}.csv")):
             if len(pair) < 2:
                 continue
             self.walls.append(tuple(map(int, pair)))
 
         # Load Shortcuts
-        self.shortcuts = Shortcuts(yield_csv_todict(self.extra_dir.joinpath("shortcuts_1.csv")))
+        self.shortcuts = Shortcuts(yield_csv_todict(self.extra_dir.joinpath(f"shortcuts_{number_of_maze}.csv")))
 
         # Load Trial Configuration
-        self.trial_configuration = TrialConfiguration(yield_csv_todict(self.extra_dir.joinpath("trial_1.csv")))
+        self.trial_configuration = TrialConfiguration(yield_csv_todict(self.extra_dir.joinpath(f"trial_{number_of_maze}.csv")))
 
-        self.image_maze1 = self.image_dir.joinpath("maze1.png")
+        self.image_maze1 = self.image_dir.joinpath(f"maze_{number_of_maze}.png")
 
         # Get participants dirs
         for participant_dir in self.root_dir.iterdir():
@@ -65,7 +69,7 @@ class Loader:
                 file_paths[sub_file.name] = sub_file
 
             if len(file_paths.items()) != 4 and force:
-                raise InsufficientDataError("Corrupted file")
+                raise InsufficientDataError("Missing file")
 
             subject = Subject(name=participant_dir.name)
 
@@ -139,13 +143,23 @@ def load_movement(path, learning=False):
                 skip_header_line = False
                 continue
             if line.find("@") != -1:
+                # check if the last trial is empty
+                if last_trial_number in movement_trials and len(movement_trials[last_trial_number]) == 0:
+                    movement_trials.pop(last_trial_number)
+
                 last_trial_number = int(line[maker_pos + 1:])
                 movement_trials[last_trial_number] = []
                 skip_header_line = True
             else:
                 movement_trials[last_trial_number].append(MovementData.from_str(line))
+
+    if last_trial_number in movement_trials and len(movement_trials[last_trial_number]) == 0:
+        movement_trials.pop(last_trial_number)
+
     if not learning and 99 in movement_trials:
         movement_trials.pop(99)
+
+
     return movement_trials
 
 

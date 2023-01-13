@@ -13,6 +13,31 @@ class Exporter:
         return list(map(str, x.values()))
 
     @staticmethod
+    def export_efficiency_to_csv(efficiency, file_name, operation="mean"):
+        header = "Header"
+        if operation == "mean":
+            operation = Exporter.mean
+            header = ["ParticipantId",  "MeanEfficiency"]
+        elif operation == "all":
+            operation = Exporter.all
+            header = ["ParticipantId"]
+            efficiency_header = []
+            for i in range(3, 23):
+                efficiency_header.append(f"Efficiency {i}")
+            header.extend(efficiency_header)
+
+        with open(file_name, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(header)
+
+            for subject in efficiency.keys():
+                row = [subject]
+                row.extend(operation(efficiency[subject]))
+                writer.writerow(row)
+
+        print(f"Exported to {file_name}")
+
+    @staticmethod
     def export_to_csv(angular_error, efficiency, file_name, operation="mean"):
         header = "Header"
         if operation == "mean":
