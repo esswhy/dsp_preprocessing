@@ -100,13 +100,20 @@ class MovementAnalyzer:
                 last_moved_block = current_pos
 
             arr = np.array(path)
-            x = (arr[:, 0]) - 0.5
-            y = (arr[:, 1]) - 0.5
-            return x, y
-        except:
-            raise KeyError("Makesure you have the uncorrupted file, otherwise exclude the folder " + str(subject.name))
+            try:
+                x = (arr[:, 0]) - 0.5
+                y = (arr[:, 1]) - 0.5
+            except IndexError:
+                raise IndexError("No data for subject " + subject.name + " trial " + str(trial_number))
 
-    def draw(self, n, x, y, bg_file=""):
+            return x, y
+
+        except TypeError:
+            raise KeyError("Make sure all the files are in the correct format, otherwise exclude the folder " + str(subject.name))
+        except KeyError:
+            raise KeyError("Make sure you've selected the proper range that matches the entries in the movement.csv " + str(subject.name))
+
+    def draw(self, n, x, y, bg_file="", reverse_divide=False, capped=True):
 
         if bg_file == "":
             bg_file = self.bg_1
@@ -118,16 +125,24 @@ class MovementAnalyzer:
         bg = mpimg.imread(bg_file)
         plt.imshow(bg, extent=[0, self.grid.grid_size[0], 0, self.grid.grid_size[1]])
 
-        if self.shortcut:
+        if not self.shortcut:
+            raise ValueError("Shortcuts not loaded")
             pass
 
         trial_name = self.current_subject.movement_sequence[n][0].trial_name
         source, destination = self.trial_configuration.get_source_destination_pair_by_name(trial_name)
         shortest = self.shortcut.get_shortcut(source, destination)
         estimated_distance = len(x)
-        efficiency = shortest / estimated_distance
-        if efficiency > 1:
-            efficiency = 1
+
+        if reverse_divide:
+            efficiency = shortest / estimated_distance
+            if efficiency > 1 and capped:
+                efficiency = 1
+        else:
+            efficiency = estimated_distance / shortest
+            if efficiency < 1 and capped:
+                efficiency = 1
+
         plt.title(
             f"Trial {n}@{trial_name}\n "
             f"From {source} to {destination}\n "
@@ -138,6 +153,14 @@ class MovementAnalyzer:
         plt.yticks(np.arange(0, self.grid.grid_size[1] + 1, step=1))
         plt.grid()
         plt.show()
+
+    def plot(self, subject, trial_number):
+        x, y = self.load_xy(subject, trial_number)
+        self.draw(trial_number, x, y)
+
+    def plot_all(self, subject, start, end):
+        for i in range(start, end+1):
+            self.plot(subject, i)
 
     def calculate_efficiency(self, n, x, y, reverse_divide=False, capped=True):
         trial_name = self.current_subject.movement_sequence[n][0].trial_name
@@ -156,7 +179,7 @@ class MovementAnalyzer:
 
     def calculate_efficiency_for_one(self, subject, start, end, reverse_divide=False, capped=True):
         efficiency_dict = {}
-        for n in range(start, end):
+        for n in range(start, end+1):
             x, y = self.load_xy(self.subjects[subject], n)
             efficiency_dict[n] = self.calculate_efficiency(n, x, y, reverse_divide, capped)
         return efficiency_dict
